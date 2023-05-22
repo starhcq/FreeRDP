@@ -323,6 +323,17 @@ static const BYTE GDI_BS_HATCHED_PATTERNS[] = {
 	0x7E, 0xBD, 0xDB, 0xE7, 0xE7, 0xDB, 0xBD, 0x7E  /* HS_DIACROSS */
 };
 
+static BOOL is_rect_valid(const RECTANGLE_16* rect, size_t width, size_t height)
+{
+    if (!rect)
+        return FALSE;
+    if ((rect->left > rect->right) || (rect->right > width))
+        return FALSE;
+    if ((rect->top > rect->bottom) || (rect->bottom > height))
+        return FALSE;
+    return TRUE;
+}
+
 BOOL gdi_decode_color(rdpGdi* gdi, const UINT32 srcColor, UINT32* color, UINT32* format)
 {
 	UINT32 SrcFormat;
@@ -1081,6 +1092,13 @@ static BOOL gdi_surface_bits(rdpContext* context, const SURFACE_BITS_COMMAND* cm
 				         cmd->bmp.bitmapDataLength, size);
 				goto out;
 			}
+
+            // Bound check, check that the paste area is valid,
+            // and determine if the picture is in the paste area.
+            const RECTANGLE_16 rect = { (UINT16)cmd->destLeft, (UINT16)cmd->destTop,
+                                        (UINT16)cmd->destLeft + cmd->bmp.width,
+                                        (UINT16)cmd->destTop + cmd->bmp.height };
+
 			if (!freerdp_image_copy(gdi->primary_buffer, gdi->dstFormat, gdi->stride, cmd->destLeft,
 			                        cmd->destTop, cmd->bmp.width, cmd->bmp.height,
 			                        cmd->bmp.bitmapData, format, 0, 0, 0, &gdi->palette,
