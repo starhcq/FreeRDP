@@ -720,6 +720,11 @@ BOOL planar_decompress(BITMAP_PLANAR_CONTEXT* planar, const BYTE* pSrcData, UINT
 
 	srcp = pSrcData;
 
+    if (!pSrcData) {
+        WLog_ERR(TAG, "Invalid argument pSrcData=NULL");
+        return FALSE;
+    }
+
 	if (!pDstData)
 	{
 		WLog_ERR(TAG, "Invalid argument pDstData=NULL");
