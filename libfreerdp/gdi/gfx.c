@@ -1252,6 +1252,18 @@ static UINT gdi_SolidFill(RdpgfxClientContext* context, const RDPGFX_SOLID_FILL_
 	for (index = 0; index < solidFill->fillRectCount; index++)
 	{
 		rect = &(solidFill->fillRects[index]);
+
+        /* Bounds check, limit the size of the requested rect
+         * no larger than the surface data buffer. */
+        if (rect->left > surface->width)
+            goto fail;
+        if (rect->top > surface->height)
+            goto fail;
+        if (rect->right > surface->width)
+            rect->right = surface->width;
+        if (rect->bottom > surface->height)
+            rect->bottom = surface->height;
+
 		nWidth = rect->right - rect->left;
 		nHeight = rect->bottom - rect->top;
 		invalidRect.left = rect->left;
